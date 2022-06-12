@@ -1,0 +1,1068 @@
+
+<?php 
+
+/*
+file name           : verifystudent.php
+database connection : buspassdatabase
+table               : student, student_dup, and  dashboard
+purpose             : 
+
+     The functionality of this page is to verify student registration
+	 
+	 there are two functionalities
+	 1) accepting registration
+	 2) rejecting registration
+	 
+
+	 In the first functionality the data is inserted into student table , deleted from
+	 student_dup and studreg counter is incremented in dashboard table
+	 
+	 
+	 In the second functionality the data is permanently from database.
+	 
+
+*/
+
+?>
+
+
+<?php
+require_once('init.php');
+$rowCount = "";
+ if(!isset($_POST['hallticket1'])){  /* for retrieving data from student entry  
+    
+    data retrieving starts
+ 
+ */
+
+	
+$row1=mysqli_query($conn,"SELECT * FROM `student_dup` WHERE HallticketNumber='".$_POST['hallticket']."'");
+
+$rowCount = mysqli_num_rows($row1);
+
+if($rowCount == null )   /* condition for checking if the user data doesn't exist */
+  {
+	  echo "<h5 style='color:red;'>student not registered</h5>";
+}
+else{
+//echo "<script>alert(localStorage.getItem('htno'));alert(localStorage.getItem('htno1'));</script>";
+
+/* executes when the data of student is present */
+
+ while($row = mysqli_fetch_array($row1)):
+ 
+
+
+
+require_once("dbcontroller.php");
+$db_handle = new DBController();
+$query ="SELECT * FROM route_master";
+$results = $db_handle->runQuery($query);
+?>
+
+<html lang=''>
+<head>
+   
+   
+   
+   <!-- code for reading image -->
+	<script>
+	function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#blah')
+                        .attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }  
+	</script>
+
+	
+    
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Poppins:300,400,500,700" rel="stylesheet">
+
+
+  <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="lib/animate/animate.min.css" rel="stylesheet">
+<script src="jquery-3.2.1.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script>
+
+
+<!-- code for boadring points based on route number -->
+function getState(val) {
+	$.ajax({
+	type: "POST",
+	url: "getState.php",
+	data:'Route_no='+val,
+	success: function(data){
+		$("#boardingpoint").html(data);
+		getCity();
+	}
+	});
+}
+
+<!-- code for fee based on boadring points -->
+
+function getCity(val) {
+	$.ajax({
+	type: "POST",
+	url: "getCity.php",
+	data:'Boarding_point='+val,
+	success: function(data){
+		$("#fee").html(data);
+	}
+	});
+}
+
+</script>
+    <style>
+    #buttons{
+	margin-top: 18px;
+	overflow: hidden;
+}
+#blah{
+  max-width:120px;
+}
+input[type=file]{
+padding:10px;
+}
+
+
+input
+{
+		border-radius: 4px;
+		
+}
+input[type=text]{	
+	border:thin solid black;
+	height:35px;
+	width:250px;
+}
+input[type=number],[type=email]{	
+	border:thin solid black;
+	height:30px;
+	width:250px;
+}
+input[type=date]{	
+	border:thin solid black;
+}
+textarea{
+	border:thin solid black;	
+}
+
+
+#fee::-ms-expand
+    {
+        display: none;
+    }
+    #fee
+    {   pointer-events:none;
+        -webkit-appearance: none;
+        -moz-appearance: none;      
+        appearance: none;
+        padding: 2px 30px 2px 2px;
+        /*border: none; - if you want the border removed*/
+    }
+
+    </style>
+	   
+    <link href="https://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="https://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    </head>
+<script>
+	function call(){
+
+	var val = "<?php echo $row['Boarding_point'] ;?>";
+
+document.cookie = "bppoint = "+val;  //for getting boardingpoint values
+
+
+var ht = "<?php echo $row['HallticketNumber']?>";
+document.cookie = "hallticket = "+ ht; // for printing receipt
+
+getState(<?php echo $row['Route_no'];?>);
+
+  //alert(localStorage.getItem("status"));
+	}
+	</script>
+	
+<body onload="call()">
+
+<div class="limiter">
+
+		<div class="container-login100" >
+
+	<!-- form starts -->	
+		<form name="form1" style="margin-left:80px;"  action="verify.php" method="POST" enctype="multipart/form-data">
+		<h5  align="center">Student Verification Form</h5><br>
+ <div class="row">
+	<div class="col-lg-4">
+      <div class="form-group">
+       <label for="rcpno">Receipt Number</label>
+        <input type="text" class="form-control" id="receipt" name="receipt"  placeholder="Receipt No" Maxlength="10" required />
+      </div>
+    </div>
+	
+	
+	<div class= "col-lg-4">
+      <div class="form-group">
+        <label for="Name">Hallticket Number</label>
+        <input type="text" class="form-control" id="hallticket1" name="hallticket1" maxlength="10" pattern="[0-9]{2}[a-zA-Z][0-9]{2}[a-zA-Z][0-9]{2}[a-zA-Z0-9][0-9]" title="enter valid Hallticket" onChange="getwords()" value="<?php echo $row['HallticketNumber']?>" readonly />
+      </div>
+    </div>
+	<span style="margin:-10px 0px 0px 50px"><img id="blah" src="img/<?php echo $row['imageofStudent']?>" alt="your image" width="119" />
+		<input type="hidden" name="image3" class="image-tag">
+	</span>
+    <input type="hidden" name="image1" value="<?php echo $row['imageofStudent']?>" >
+
+<!-- code for finding details from hallticket -->
+
+<script language='JavaScript'>
+function getwords(){
+myOutput= document.getElementById('Course');
+ht = document.getElementById('hallticket1');
+
+//alert(ht.value);
+
+document.cookie = "hallticket = "+ht.value;
+
+if (ht.value != "")
+{ var str =  ht.value;
+   var res =  str.substr(0, 2);    //for calculating year
+   var d = new Date();
+
+   var d1 = d.getFullYear();
+   var year = d1%100;                      //calculate the year from date
+   var dy = document.getElementById('detainyear');
+     var dy1 = document.getElementById('year1');
+    var d2 = d.getMonth(); 
+	   if(d2<5)
+		year = year -1; 
+   if((year-res +1)>4)
+    {   
+        document.getElementById("YES").checked = true;
+        document.getElementById('Year').value = " ";
+		dy.style.display = "block";
+		dy1.style.display = "none";
+		
+	} 
+   else
+   { 
+     document.getElementById("NO").checked = true;
+     document.getElementById('Year').value = year-res +1;
+     dy.style.display = "none";
+     dy1.style.display = "block";
+   }
+ // myOutput.value=textbox.value;
+ if(str.substr(5, 1) == 'A'||str.substr(5,1) == 'a'){
+ 
+ var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch)
+            {   
+                case '01': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "CIVIL"; break;
+                case '02': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "EEE";  break;
+                case '03': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "MECH"; break;
+                case '04': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "ECE"; break;
+                case '05': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "CSE"; break;
+                case '08': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "CHEM"; break;
+                case '12': document.getElementById('Course').value = "B TECH";  document.getElementById('department').value = "IT"; break;
+                default:document.getElementById('Course').value = "";   document.getElementById('department').value = "";  alert('<?php echo "Invalid Hall Ticket Number";?>');
+   }
+ }else  if(str.substr(5, 1) == 'R'||str.substr(5,1) == 'r'){
+	 var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch){
+	 case '00': document.getElementById('Course').value = "B PHARM";   document.getElementById('department').value = "B PHARM"; break;
+     default: document.getElementById('Course').value = "";   document.getElementById('department').value = "";  alert('<?php echo "Invalid Hall Ticket Number";?>');
+	}
+ }
+ else if(str.substr(5, 1) == 'S'||str.substr(5,1) == 's'){
+	 var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch){
+	 case '01':
+     case '02':	
+     case '03':  document.getElementById('Course').value = "M PHARM";   document.getElementById('department').value = "M PHARM"; break;
+     default: document.getElementById('Course').value = "";   document.getElementById('department').value = "";  alert('<?php echo "Invalid Hall Ticket Number";?>');
+	}
+ }
+ else if(str.substr(5, 1) == 'T'||str.substr(5,1) == 't'){
+	 var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch){
+	 case '01':
+     case '02':	
+     case '03':  document.getElementById('Course').value = "PHARM D";   document.getElementById('department').value = "PHARM D"; break;
+     default: document.getElementById('Course').value = "";   document.getElementById('department').value = "";  alert('<?php echo "Invalid Hall Ticket Number";?>');
+	}
+ }
+ else if(str.substr(5, 1) == 'D'||str.substr(5,1) == 'd'){
+	 var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch){
+	 case '01':
+     case '02':	
+     case '03':  document.getElementById('Course').value = "M Tech";   document.getElementById('department').value = "M Tech"; break;
+     default: alert('<?php echo "Invalid Hall Ticket Number";?>');
+	}
+ }
+ else if(str.substr(5, 1) == 'E'||str.substr(5,1) == 'e'){
+	 var branch = str.substr(6, 2);
+ document.getElementById('department').value = branch;
+ switch (branch){
+	 case '01':
+     case '02':	
+     case '03':  document.getElementById('Course').value = "MBA";   document.getElementById('department').value = "MBA"; break;
+     default:  alert('<?php echo "Invalid Hall Ticket Number";?>');
+	}
+ }
+ else{
+	 alert('<?php echo "Invalid Hall Ticket Number";?>');
+ }
+}
+else
+alert('<?php echo "No word has been entered!";?>');
+}
+</script>
+  </div>
+ 
+    <div class="row">
+  
+    	<div class= "col-lg-4">
+ <div class="form-group">
+    <label for="Name">Name</label>
+         <input type="text" class="form-control" id="studname" name="studname"  placeholder="Student Name" value="<?php echo $row['Name']?>"  pattern="[A-Za-z ]{3,}" title="No special characters, only characters of minimum 3 and maximum 30" maxlength="50"  required />
+    
+  </div>
+  </div>
+  
+  
+    <script>
+  
+  $('#studname').on('keypress', function (event) {
+	  
+    var regex = new RegExp("^[a-zA-Z ]");
+    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    if (!regex.test(key)) {
+       event.preventDefault();
+       return false;
+    }
+});
+  </script>
+  
+    	<div class= "col-lg-4">
+ <div class="form-group">
+    <label for="Father's name">Father's Name</label>
+      <input type="text" class="form-control" id="Fname" name="Fname" placeholder="Father's Name" value="<?php echo $row['Father_Name']?>" pattern="[A-Za-z ]{3,}" title="No special characters, only characters of minimum 3 and maximum 50" maxlength="50"  required />
+     
+  </div>
+  </div>
+  
+   <script>
+  
+  $('#Fname').on('keypress', function (event) {
+	  
+    var regex = new RegExp("^[a-zA-Z ]");
+    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    if (!regex.test(key)) {
+       event.preventDefault();
+       return false;
+    }
+});
+  </script>
+  
+  
+  <div class="col-lg-4">
+  
+  <input type="file" id="file" name="image"  onchange="readURL(this);"  />                                     
+  <input id="cam" type="button" value="Capture Image"  onchange="readURL(this);" style="border:1px solid #116EB0;width:250px;height:35px;color:white;background-color: #116eb0;" onclick="camcall();"/>
+  </div>
+ </div><br/>
+  
+  
+  <div class="modal" id="show" >
+<input type="button" id="clickclose" class="close" style="background-color:transparent;margin-right:10px;color:black;height:20px;width:15px;"  value="X" />
+    <div id="my_camera" ></div>
+		
+			    <input type="button" class="btn btn-success" value="Take Snapshot" onClick="take_snapshot()">
+             
+  </div>
+  
+  
+  <script language="JavaScript">
+    Webcam.set({
+        width: 200,
+        height: 220,
+        image_format: 'jpeg',
+        jpeg_quality: 100
+    });
+  
+    function take_snapshot() {
+        Webcam.snap( function(data_uri) {
+		
+            $(".image-tag").val(data_uri);
+             $('#blah').attr('src', data_uri);
+			 $('#show').delay(40).fadeOut();
+			//alert(data_uri);
+			Webcam.reset();
+          //  document.getElementById('results').innerHTML = '<img src="'+data_uri+'"/>';
+        } );
+    }
+	
+	$('#clickclose').click(function() {
+		//alert('hi');
+		Webcam.reset();
+		$('#show').delay(10).fadeOut();
+});
+	
+</script>
+ 
+ 
+  <script>
+  
+   // code for modal box
+  
+	
+	function camcall(){
+		 	
+    Webcam.attach( '#my_camera' );
+   $('#show').delay(40).fadeIn();
+
+
+		//document.getElementById("button").disabled = true;
+		document.getElementById("show").style.display = "block";
+		//alert(sta);
+		//document.getElementById("show").delay(8000).fadeOut();
+	//	ready();
+	}	
+  </script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript"> 
+      /*
+	  $(document).ready( function() {
+        $('#show').delay(4000).fadeOut();
+      });
+	 */
+	  
+	var modal = document.getElementById('show');
+
+// Get the button that opens the modal
+var btn = document.getElementById("show");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+    </script>
+  
+ 
+ 
+  <div class="row">
+  
+    	<div class= "col-lg-4">
+ <div class="form-group">
+    <label for="course">Course</label>
+    <input type="text" class="form-control" id="Course" name="Course" value="<?php echo $row['Course']; ?>" readonly />
+	
+  </div>
+  </div>
+  
+    	<div class= "col-lg-4">
+ <div class="form-group">
+    <label for="Department">Department</label>
+    <input type="text" class="form-control" id="department" name="department"  value="<?php echo $row['Department_Name']; ?>" readonly />
+	
+  </div>
+  </div>
+  </div>
+   <div class="row">
+   <div class= "col-lg-4">
+  
+    
+    <label class="Detain" >Detained ?<div class="form-group form-inline" style="margin-top:5px;">
+    <input type="radio" class="form-control" id="YES" name="Detain" onChange="detainyes()" <?php if($row['Detain'] == 'YES') echo "checked";  ?> value="YES">&nbsp;&nbsp;Yes </label>&nbsp;&nbsp;
+	    <label class="Detain">
+
+	<input type="radio" class="form-control" id="NO" name="Detain" onchange="detainno()" <?php if($row['Detain'] == 'NO') echo "checked"; ?> value="NO">&nbsp;&nbsp;No
+	</label>
+	
+	<!-- code for changing detained values -->
+	
+<script language='JavaScript'>
+function detainyes()
+{ var dy = document.getElementById('detainyear');
+  var dy1 = document.getElementById('year1');
+	 if(document.getElementById("YES").checked == true)
+	  {
+		  dy.style.display = "block";
+		  dy1.style.display= "none";
+	  }
+}
+
+
+function detainno()
+{ var dy = document.getElementById('detainyear');
+ var dy1 = document.getElementById('year1');
+	 if(document.getElementById("NO").checked == true)
+	  {
+		  dy.style.display = "none";
+		  dy1.style.display= "block";
+	  }
+}
+
+</script>
+	    
+   </div>
+  </div>
+  
+  <div class="col-lg-4" id="detainyear" style="display:none;">
+   <div class="form-group" >
+    <label for="dYear" >Current Year</label>
+    <input type="text" class="form-control" id="dYear" name="dYear" value="<?php echo $row['Year']; ?>"  placeholder="Enter Current Year" />
+		
+  </div>
+  </div>
+  
+   <div class="col-lg-4" id="year1" > 
+   <div class="form-group">
+    <label for="Year" >Year</label>
+    <input type="text" class="form-control" id="Year" name="Year"  value="<?php echo $row['Year']; ?>"  />
+		
+  </div>
+  </div>
+ </div>
+    <div class="row">
+<div class="col-lg-4">
+  <div class="form-group">
+    <label for="Mobile">Mobile Number</label>
+    <input type="text" class="form-control" pattern="[6789][0-9]{9}" title="Phone number starting with 6-9 and remaining 9 digit with 0-9" id="mobile" name="mobile" placeholder="Enter Mobile No"  value="<?php echo $row['Mobile_Number']; ?>"  required />
+   </div></div>
+   
+   
+  <script>
+  
+  $('#mobile').on('keypress', function (event) {
+	  
+    var regex = new RegExp("^[0-9]");
+    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    if (!regex.test(key)) {
+       event.preventDefault();
+       return false;
+    }
+});
+  </script>
+
+   <div class="col-lg-4">
+  <div class="form-group">
+    <label for="Email">Email</label>
+    <input type="email" class="form-control" id="email" maxlength="60" name="email" value="<?php echo $row['Email']; ?>"  placeholder="Enter Email" required />
+    
+  </div>
+  </div>
+  <div class="col-lg-4">
+  <div class="form-group">
+    <label for="Address">Address</label>
+    <input type="text" class="form-control" id="address" maxlength="90" name="address" placeholder="Your Address"  title="should not contain '" value="<?php echo $row['Address']; ?>"  required />
+    <p style="color:red;">special character '/ not allowed</p>
+   </div> 
+  </div>
+  </div>
+    <!-- code for removing not allowed values -->
+	<script>
+    
+ $('body').on('input', 'input[name=address]', function() {
+	 $ap = "'";
+  $(this).val($(this).val().replace('/', ' '));
+  $(this).val($(this).val().replace($ap, ' '));
+});
+  </script>
+	
+  <div class="row">
+   <div class="col-lg-4">
+  <div class="form-group">
+  <label>Route Number</label><br/>
+ <!-- code for getting routes --> 
+<select name="routeno" id="routeno" style="height:30px;width:250px;border:1px solid black;" class="form-control" onChange="getState(this.value);"  >
+<option value disabled selected>Select Route</option>
+  
+
+<?php
+foreach($results as $country) {
+?>
+<option value="<?php echo $country["Route_No"]; ?>" <?php if($row['Route_no'] == $country['Route_No']) echo "selected"; ?>  ><?php echo $country["Route_No"]; ?></option>
+<?php
+}
+?>
+</select>
+  </div>
+  </div>
+ 
+ 
+ <!-- code for getting boardingpoint values -->
+ <div class="col-lg-4">
+  <div class="form-group">
+    <label for="bp">Boarding Point</label><br/>
+	<select name="boardingpoint" style="height:30px;width:250px;border:1px solid black;" id="boardingpoint" class="form-control" onChange="getCity(this.value);">
+
+</select>
+   
+  </div>
+  </div>
+  
+ <div class="col-lg-4">
+   <div class="form-group">
+    <label for="fee">Total Fee</label><br/>
+     <select name="fee" id="fee" style="width:250px;border:1px solid black;"  class="form-control"  onChange="feepaid();">
+</select>
+  </div>
+  
+  </div>
+  
+  
+ </div> 
+  
+   <div class="row">
+  
+  
+		<div class= "col-md-4">
+  <div class="form-group">
+    <label for="paid"> Paid </label>
+  <input type="number" class="form-control" id="paid" onChange="feepaid()" name="paid"  placeholder=" " required />
+    
+  </div>
+  </div>
+  
+  <!-- code for calculating due -->
+  
+ <script> 
+ function feepaid(){
+
+
+	
+	
+e = document.getElementById('fee');
+paidfee = document.getElementById('paid');
+if (paidfee.value != "")
+{  
+   var duefee = e.value - paidfee.value;
+   
+   if(duefee<0)
+   { document.getElementById("paid").value = "Enter Valid Amount"; 
+     document.getElementById("Due").value = " ";
+   }
+   else
+     document.getElementById("Due").value = duefee;
+
+}
+else
+alert('<?php echo "No word has been entered!";?>')
+
+	}
+
+ 
+ </script>
+ 
+  
+  <div class="col-lg-4">
+  
+  <label for="due">Due</label>
+      <input type="text"  class="form-control" id="Due" name="Due" readonly>
+  </div>
+  
+  
+   <div class= "col-lg-4">
+  
+    
+    <label class="concession" >Concession ?<div class="form-group form-inline" style="margin-top:5px;">
+    <input type="radio" class="form-control" id="conYES" name="concession" onChange="conyes()"	value="YES">&nbsp;&nbsp;YES </label>&nbsp;&nbsp;
+	    <label class="Detain">
+
+	<input type="radio" class="form-control" id="conNO" name="concession" onchange="conno()" value="NO" checked>&nbsp;&nbsp;NO
+	</label>
+	  
+     
+    <input type="text" class="form-control" id="confee" name="concessionfee" placeholder="Concession Amount" style="display:none;margin-left:10px;width:170px;" />
+
+	
+	<!-- code for changing detained values -->
+<script language='JavaScript'>
+function conyes()
+{ var dy = document.getElementById('confee');
+	 if(document.getElementById("conYES").checked == true)
+	  {
+		  dy.style.display = "block";
+	  }
+}
+
+
+function conno()
+{ var dy = document.getElementById('confee');
+	 if(document.getElementById("conNO").checked == true)
+	  {
+		  dy.style.display = "none";
+	  }
+}
+
+</script>
+	    
+ 
+ </div>
+  </div>
+  
+</div>
+  
+    <div class="row">
+  
+  <div class="col-lg-4">
+  <div class="form-group">
+    <label for="Name">Remarks</label>
+    <input type="text" class="form-control" id="remarks" name="remarks" maxlength="30" aria-describedby="Name" placeholder="Remarks" value="<?php echo $row['Remarks']?>" required />
+    
+  </div>
+  </div>
+  <?php  
+    $y = date("Y"); 
+    $y1 = $y%100 ;
+    $y2 = $y1 + 1;	
+	$y3 = $y1 + 2;
+  ?>
+  <div class="col-lg-4">
+   <div class="form-group">
+    <label for="Year">Academic Year</label>
+    <select class="form-control" style="height:30px;width:250px;border:1px solid black;" id="Academicsyear" name="academicsyear">
+		<option>Select Academic year</option>
+		<option value="<?php echo ($y -1)."-".$y%100; ?>" <?php if(($y -1)."-".$y%100 == $row['acadyear']) echo 'selected'; ?>  ><?php echo ($y -1)."-".$y%100; ?></option>
+		<option value="<?php echo $y."-".$y2; ?>" <?php if($y."-".$y2 == $row['acadyear']) echo 'selected'; ?> ><?php echo $y."-".$y2; ?></option>
+		<option value="<?php echo floor($y/100).$y2."-".$y3; ?>" <?php if(floor($y/100).$y2."-".$y3 == $row['acadyear']) echo 'selected'; ?>   ><?php echo floor($y/100).$y2."-".$y3; ?></option>
+    </select>
+  </div>
+  </div>
+  </div>
+    
+
+    
+	
+    <div class="row">
+  <div class="col-lg-6">
+ </div>
+ 
+  <div class="col-lg-1">
+  <input type="submit" name="submit" value="Submit" class="btn btn-primary"/>
+ </div>
+ 
+ <div class="col-lg-3">
+ </div>
+ 
+    <div class="col-lg-1">
+  <input type="submit" id="dec" name="submit1" value="Decline" class="btn btn-primary" onclick="declinefuc()" />
+  <input type="hidden" name="decline" id="decline" value="0">
+ </div>
+ 
+ <script>
+    function declinefuc(){
+		document.getElementById('decline').value = '1';
+		//alert(document.getElementById('decline').value);
+		document.getElementById('receipt').required = false;
+		document.getElementById('paid').required = false;
+		document.getElementById('Due').required = false;
+		
+	}
+ 
+ </script>
+ 
+ 
+   <!-- code for printing receipt 
+  <div class="col-lg-4">
+  <input type="button" id="print" name="submit" value="print receipt" style="<?php if(isset($_POST['hallticket'])){ echo "display:block";}else echo "display:none"; ?>;" onclick="receiptprint()" class="btn btn-primary"/>
+</div>-->
+  </div>
+  <script>
+  
+function receiptprint(){ 
+window.open('receipt1.php', '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=250,left=500,width=1215,height=680');
+
+ //document.getElementById('print').style.display = "none";
+}
+
+ 
+  </script>
+  
+
+  
+  </div>
+
+</div>
+ 
+</form>
+<!-- form ends -->
+
+</div>
+
+</body>
+</html>
+<?php
+endwhile;} }
+
+/* data  retrieving ends */
+
+?>
+
+
+
+	<?php
+require "init.php";
+
+$hallticket="";
+$studname="";
+$Fname="";
+$department="";
+$mobile="";
+$Course="";
+$Year="";
+$total="";
+$due="";
+$address = "";
+$email = "";
+$boardingpoint="";
+$routeno="";
+$detain="";
+$receipt="";
+$date="";
+$remarks="";
+$idcard="";
+$image = " ";
+$count1 = "";
+$count2 = "";
+$apid = " ";
+$decline = "";
+
+$conncession = "";
+$connfee = "";
+$img="";
+
+if(isset($_POST['submit1'])){
+$decline = $_POST['decline'];
+$hallticket=strtoupper($_POST['hallticket1']);
+if($decline == 1){
+		     
+			 $status = mysqli_query($conn,"delete from student_dup where HallticketNumber = '$hallticket'");
+			 if($status == true) echo '<h5 style="color:green">Data Deleted Successfully.</h5><br>';
+			 
+			 $query2=mysqli_query($conn,"SELECT studdec FROM dashboard");
+    $res1=mysqli_fetch_array($query2);
+	$count1 = $res1["studdec"] + 1 ;
+	$sql1 = "UPDATE dashboard SET studdec = '".$count1."'";
+	mysqli_query($conn,$sql1);
+			 
+		}
+}
+		
+if(isset($_POST['hallticket1']) && !isset($_POST['submit1'])){
+	
+	/*  data entry starts */
+	
+	
+$target="img/".basename($_FILES['image']['name']);
+$image=$_FILES['image']['name'];
+$hallticket=strtoupper($_POST['hallticket1']);
+$studname=strtoupper($_POST['studname']);
+$Fname=strtoupper($_POST['Fname']);
+$department=strtoupper($_POST['department']);
+$mobile=$_POST['mobile'];
+$Course=strtoupper($_POST['Course']);
+$Year=$_POST['Year'];
+$total=$_POST['fee'];
+$due=$_POST['Due'];
+$email =  strtoupper($_POST['email']);
+$address = strtoupper($_POST['address']);
+$boardingpoint=strtoupper($_POST['boardingpoint']);
+$routeno=$_POST['routeno'];
+$detain=strtoupper($_POST['Detain']);
+$concession=strtoupper($_POST['concession']);
+$receipt=strtoupper($_POST['receipt']);
+$date= date("Y-m-d h:i:s");
+$remarks=strtoupper($_POST['remarks']);
+$ay = strtoupper($_POST['academicsyear']);
+$usr = $_SESSION['username'];
+
+if($detain == 'YES')
+	$Year = $_POST['dYear'];
+
+
+if($concession == 'YES')
+	$connfee = $_POST['concessionfee'];
+
+
+$status = 0;
+
+
+
+if($image == "")
+	$image = $_POST['image1'];  /* is user doesn't upload new image */
+
+
+$img = $_POST['image3'];
+if($image == "" )
+if($img == "")
+ {
+	// echo "<script>alert('Photo Not Found');</script>";
+	 $status = 1;
+ }
+else	
+{
+//echo "img ".$img."img ";
+    $folderPath = "img/";
+  
+    $image_parts = explode(";base64,", $img);
+    $image_type_aux = explode("img/", $image_parts[0]);
+    //$image_type = $image_type_aux[1];
+  
+    $image_base64 = base64_decode($image_parts[1]);
+    $fileName = $hallticket . '.png';
+  
+    $file = $folderPath . $fileName;
+    file_put_contents($file, $image_base64);
+    //echo $file;
+    $image = $fileName;
+	}
+
+	
+
+$msg="";
+
+	
+	
+	
+		$query=mysqli_query($conn,"SELECT * FROM `student` WHERE HallticketNumber='".$hallticket."'");
+		$query1=mysqli_query($conn,"SELECT * FROM `student` ");
+		$res=mysqli_fetch_row($query);
+		if($res )
+		{
+		
+        echo '<h5 style="color:red">Student Already Registered.</h5><br>';
+		
+echo "<script> alert('Student Already Registered.');</script>";
+			
+		}
+		else if(isset($_POST['hallticket1']) && $status!=1){ 
+		
+$sql = "INSERT INTO `student`(`HallticketNumber`, `Name`, `Father_Name`, `Department_Name`, `Mobile_Number`, `Email`, `Address`, `Course`, `Year`, `Total`, `Due`, `bpid`, `Boarding_point`, `Route_no`, `Detain`, `Receipt_Number`, `Date_of_Payment`, `Remarks`, `Idcard_status`, `imageofStudent`, `acadyear`, `appid`, `Verifiedby`,`concession`,`cona_amount`) VALUES 
+ ('$hallticket','$studname','$Fname','$department','$mobile','$email','$address','$Course','$Year','$total','$due',(SELECT bpid from bus_master where Boarding_point = '$boardingpoint' and Route_No = '$routeno'),'$boardingpoint','$routeno','$detain','$receipt','$date','$remarks','not print','$image','$ay',' ','$usr','$concession','$connfee')";
+ //echo $sql;
+if(mysqli_query($conn, $sql) )
+{
+echo '<h5 style="color:green">Student Data Verified Successfully.</h5><br>';
+
+echo "<script> alert('Student Data Verified Successfully.');</script>";
+
+$query2=mysqli_query($conn,"SELECT studver FROM dashboard");
+    $res1=mysqli_fetch_array($query2);
+	$count1 = $res1["studver"] + 1 ;
+	$sql1 = "UPDATE dashboard SET studver = '".$count1."'";
+	mysqli_query($conn,$sql1);
+	
+	
+	
+echo "<script>
+
+
+if(localStorage.getItem('status') == 1){  
+
+
+window.open('formprint.php', '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=250,left=500,width=1215,height=680');
+}
+else{
+	
+window.open('formprint.php', '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=250,left=500,width=1215,height=680');
+}
+
+		</script>";
+		
+
+	$message = 'Your step 1 of registration has been successful. Please note the reference Number :'.$apid.'. \r\n Step 2: Please visit the counter and submit the reference number.';
+   //echo "<script type='text/javascript'>alert('$message');</script>";	
+
+   $query2=mysqli_query($conn,"SELECT studver FROM dashboard");
+    $res1=mysqli_fetch_array($query2);
+	$count2 = $res1["studver"] + 1 ;
+	$sql1 = "UPDATE dashboard SET studver = '".$count2."'";
+	mysqli_query($conn,$sql1);
+	
+     /*  for updating available seats  */
+	 
+	$query1=mysqli_query($conn,"SELECT * FROM `route_master` WHERE Route_No='".$routeno."'");
+    $res1=mysqli_fetch_array($query1);
+	$count1 = $res1["Counter"] - 1 ;
+	$sql1 = "UPDATE route_master SET Counter = '".$count1."'  where Route_No = '".$routeno."'";
+	mysqli_query($conn,$sql1);
+     
+	
+    /*  deleting the data from duplicate table */	
+	 
+	mysqli_query($conn,"delete from student_dup WHERE HallticketNumber='".$hallticket."'"); 
+	
+	
+	echo '<script type="text/javascript">
+
+ //alert("reset");
+ document.getElementById("form1").reset();
+
+</script>';
+
+}
+else if(!isset($_POST['hallticket1']))  
+{
+
+	echo '<h5 style="color:red">Unable to Register Student.</h5><br>';
+		}
+		
+if(move_uploaded_file($_FILES['image']['tmp_name'],$target)){
+	$msg="Image uploaded successfully";
+}else
+{
+	$msg="There was a problem uploaded image";
+		}
+/*$sql1="SELECT * FROM student";
+$result=mysqli_query($conn,$sql1);
+while($row=mysqli_fetch_array($result))
+{
+echo "<img src='img/".$row['image']."'>";
+
+}
+*/
+/* data entry ends */
+		}
+} 
+?>
